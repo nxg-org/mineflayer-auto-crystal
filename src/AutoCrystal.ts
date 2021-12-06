@@ -102,8 +102,6 @@ export class AutoCrystal {
     private backup: boolean = false;
     public placeDistance = 5;
 
-
-
     /**
      * Options for the `AutoCrystal` class.
      * @typedef {Object} Options
@@ -150,7 +148,7 @@ export class AutoCrystal {
             if (entity.name?.includes("crystal")) {
                 this.numPlaced++;
             }
-        })
+        });
         this.bot.on("entityGone", (entity) => {
             if (entity.name?.includes("crystal")) {
                 this.numBroke++;
@@ -164,7 +162,6 @@ export class AutoCrystal {
     public getTarget(): Entity | null {
         return this.target;
     }
-
 
     /**
      * Emits the debug log event with the specified message.
@@ -204,7 +201,7 @@ export class AutoCrystal {
     private updatePlaced(position: Vec3, add: boolean): void {
         add ? this.crystalsPlaced.add(position.toString()) : this.crystalsPlaced.delete(position.toString());
         // console.log("updating list, action:", add ? `adding ${position}`: `removing ${position}`, "   Before size?:", size, "   after size?:", this.crystalsPlaced.size)
-        return
+        return;
     }
 
     public filterPositions(positions: Vec3[]) {
@@ -327,25 +324,28 @@ export class AutoCrystal {
      */
     private async placeCrystal(position: Vec3, number: number): Promise<Entity | null> {
         this.wantedPlaced++;
-        const crystal = Object.values(this.bot.entities).find(e => ((e.name?.includes("crystal") ?? false) && this.crystalsPlaced.has(e.position.toString()))) ?? null
+        const crystal =
+            Object.values(this.bot.entities).find(
+                (e) => (e.name?.includes("crystal") ?? false) && this.crystalsPlaced.has(e.position.toString())
+            ) ?? null;
         if (!crystal) {
-  
             const block = this.bot.blockAt(position);
             if (!(block && ["bedrock", "obsidian"].includes(block?.name))) return null;
             try {
-                // this.bot.lookAt(block.position);   
-                // 
-                
-                this.placeEntityWithOptions(block, new Vec3(0, 1, 0), { forceLook: "ignore" })
-                this.updatePlaced(position.offset(0.5, 1, 0.5), true)
+                // this.bot.lookAt(block.position);
+                //
 
-                console.log(`PLACED on ${number}. Mode: ${this.backup ? "backup": "normal"}  Crystal? ${!!crystal}`);
+                this.placeEntityWithOptions(block, new Vec3(0, 1, 0), { forceLook: "ignore" });
+                this.updatePlaced(position.offset(0.5, 1, 0.5), true);
+
+                console.log(`PLACED on ${number}. Mode: ${this.backup ? "backup" : "normal"}  Crystal? ${!!crystal}`);
                 await this.breakCrystal();
                 return null;
-
             } catch (err) {
-                const newCrystal = Object.values(this.bot.entities).find(e => ((e.name?.includes("crystal") ?? false) && this.crystalsPlaced.has(e.position.toString())))
-                console.log(`ERROR on ${number}. Mode: ${this.backup ? "backup": "normal"}  Crystal? ${!!newCrystal}, error? ${err}`);
+                const newCrystal = Object.values(this.bot.entities).find(
+                    (e) => (e.name?.includes("crystal") ?? false) && this.crystalsPlaced.has(e.position.toString())
+                );
+                console.log(`ERROR on ${number}. Mode: ${this.backup ? "backup" : "normal"}  Crystal? ${!!newCrystal}, error? ${err}`);
                 // console.log(err)
                 // console.log("failed to place, placed crystal count: ", this.crystalsPlaced.size);
                 // if (this.backup)
@@ -355,7 +355,6 @@ export class AutoCrystal {
                 if (this.options.logErrors) this.bot.emit("AutoCrystalError", err);
                 return null;
             }
- 
 
             // && crystal.position.distanceTo(this.bot.entity.position) <= Math.pow(this.options.breakDistance!, 2)
         } else {
@@ -376,8 +375,7 @@ export class AutoCrystal {
         if (!this.enabled) {
             return false;
         }
-        if (!crystal)
-            crystal = this.bot.nearestEntity((entity) => (entity.name?.includes("crystal") ?? false)); //&& this.crystalsPlaced.has(entity.position.toString()));
+        if (!crystal) crystal = this.bot.nearestEntity((entity) => entity.name?.includes("crystal") ?? false); //&& this.crystalsPlaced.has(entity.position.toString()));
         if (crystal) {
             const damage = this.selfDamage(crystal.position);
 
@@ -387,8 +385,8 @@ export class AutoCrystal {
                 this.bot.game.gameMode !== "creative" &&
                 (damage >= this.options.damageThreshold! || damage > this.bot.health)
             ) {
-                console.log(this.bot.game.gameMode)
-                console.log("hm?")
+                console.log(this.bot.game.gameMode);
+                console.log("hm?");
                 return false;
             }
 
@@ -428,7 +426,7 @@ export class AutoCrystal {
      */
     async getHoles(position?: Vec3): Promise<Vec3[]> {
         let holes: Vec3[] = [];
-        console.log(position)
+        console.log(position);
         const blocks = this.bot.findBlocks({
             point: position ?? this.bot.entity.position,
             maxDistance: 10,
@@ -463,7 +461,7 @@ export class AutoCrystal {
         // this.bot.swingArm(undefined);
 
         const dest = referenceBlock.position.plus(faceVector);
-        
+
         // const entity = await this.waitForEntitySpawn("end_crystal", dest);
 
         return;
@@ -488,7 +486,6 @@ export class AutoCrystal {
             const listener = (entity: Entity) => {
                 const dist = entity.position.distanceTo(placePosition);
                 if (entity.name === mobName && dist < maxDistance) {
-
                     //@ts-expect-error
                     this.bot.emit("entityPlaced", entity);
                     resolve(entity);
@@ -531,15 +528,15 @@ export class AutoCrystal {
             if (this.enabled) {
                 if (placed !== 0)
                     console.log(
-                        `Wanted ${wanted} crystals placed. Placed ${placed} crystals in ${pause} ms. Broke ${broken} crystals. ${(placed / pause) * 1000} pCPS. ${
-                            (broken / pause) * 1000
-                        } bCPS. ${this.crystalsPlaced.size} Logged Placements.`
+                        `Wanted ${wanted} crystals placed. Placed ${placed} crystals in ${pause} ms. Broke ${broken} crystals. ${
+                            (placed / pause) * 1000
+                        } pCPS. ${(broken / pause) * 1000} bCPS. ${this.crystalsPlaced.size} Logged Placements.`
                     );
                 else
                     console.log(
                         `Wanted ${wanted} crystals placed. Placed 0 crystals. Attempted to break ${broken} crystals. \nTotal placed size: ${this.crystalsPlaced.size} \ntarget: ${this.target?.username} positions found: ${this.positions?.length}`
                     );
-                    if (this.crystalsPlaced.size === 0 && this.target) this.crystalsPlaced.clear()
+                if (this.crystalsPlaced.size === 0 && this.target) this.crystalsPlaced.clear();
             }
         }
     }
@@ -561,7 +558,7 @@ export class AutoCrystal {
             //     await sleep(50);
             //     continue;
             // }
-            const time = performance.now()
+            const time = performance.now();
             this.target = await this.getNearestPlayer();
             const crystal = this.bot.inventory.items().find((item) => item.name.includes("crystal"));
 

@@ -69,7 +69,7 @@ export class AutoCrystalRewrite {
 
     constructor(public bot: Bot, options?: Partial<AutoCrystalRewriteOptions>) {
         this.bot = bot;
-        this.placementsPerTick = options?.placementsPerTick ?? 2
+        this.placementsPerTick = options?.placementsPerTick ?? 2;
         this.tpsSync = options?.tpsSync ?? false;
         this.useOffhand = options?.useOffhand ?? false;
         this.placementPriority = options?.placementPriority ?? "damage";
@@ -327,7 +327,9 @@ export class AutoCrystalRewrite {
                 const time = performance.now();
                 // await this.bot.placeEntity(this.bot.blockAt(block.position.offset(0, 0, 0))!, new Vec3(0, 1, 0));
                 try {
-                    await this.placeEntityNoWait(this.bot.blockAt(block.position.offset(0, 0, 0))!, new Vec3(0, 1, 0), { forceLook: "ignore"});
+                    await this.placeEntityNoWait(this.bot.blockAt(block.position.offset(0, 0, 0))!, new Vec3(0, 1, 0), {
+                        forceLook: "ignore",
+                    });
                     // const latestId = Number(Object.keys(this.bot.entities).sort((a, b) => Number(a) - Number(b))[0])
                     // this.entityController.generateEntity(latestId + 1, 51, position.offset(0.5, 1, 0.5))
                     this.lastPlacementTime = time;
@@ -385,13 +387,12 @@ export class AutoCrystalRewrite {
     }
 
     public async start(): Promise<boolean> {
- 
         // if (!this.enabled || this.isRunning) return false;
-        this.isRunning = true
+        this.isRunning = true;
         while (this.isRunning) {
             const time = performance.now();
             this.target = await this.bot.util.filters.allButOtherBotsFilter();
-            if(!this.target || !this.hasCrystals()) break;
+            if (!this.target || !this.hasCrystals()) break;
             //Begin loading positions.
             if (!this.asyncLoadPositions) await this.getPositions();
             if (!this.placementPositions || this.placementPositions.length === 0) {
@@ -462,19 +463,12 @@ export class AutoCrystalRewrite {
         return damage <= this.maxSelfDamage || damage < this.bot.health;
     }
 
-    private async findPositions(
-        entity: Entity,
-        number: number = 1,
-        raw: boolean = false,
-        backup?: boolean,
-    ): Promise<Vec3[] | null> {
-        backup ??= this.useBackupPosAlgorithm
+    private async findPositions(entity: Entity, number: number = 1, raw: boolean = false, backup?: boolean): Promise<Vec3[] | null> {
+        backup ??= this.useBackupPosAlgorithm;
         const entity_position = entity.position.clone();
 
-    
-        let positions = backup ? await testFindPosition(this, entity) : await predictivePositioning(this, entity) // await testFindPosition(this, entity)
+        let positions = backup ? await testFindPosition(this, entity) : await predictivePositioning(this, entity); // await testFindPosition(this, entity)
         // let positions =  await predictivePositioning(this, entity) ;
-
 
         if (!raw) positions = this.filterPositions(positions);
 

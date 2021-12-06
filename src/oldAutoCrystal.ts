@@ -122,10 +122,10 @@ export class AutoCrystal {
             else if (!player && this.started && this.enabled) this.stop();
         });
 
-        this.bot.on("entityGone", entity => {
-            if (entity.name?.includes("crystal")) this.crystalsPlaced.delete(entity.position)
-        })
-        this.bot.on("AutoCrystalError", console.error)
+        this.bot.on("entityGone", (entity) => {
+            if (entity.name?.includes("crystal")) this.crystalsPlaced.delete(entity.position);
+        });
+        this.bot.on("AutoCrystalError", console.error);
     }
 
     /**
@@ -155,11 +155,9 @@ export class AutoCrystal {
         return this.bot.getExplosionDamages(entity, position, 6, false) ?? 0;
     }
 
-
     private selfDamage(position: Vec3): number {
-        return this.bot.selfExplosionDamages(position, 6, false) ?? 0
+        return this.bot.selfExplosionDamages(position, 6, false) ?? 0;
     }
-
 
     /**
      * Finds the best position to place the crystal on to.
@@ -185,7 +183,7 @@ export class AutoCrystal {
             matching: (block) => block.name === "obsidian" || block.name === "bedrock",
         });
 
-         positions = positions.filter(
+        positions = positions.filter(
             (block) =>
                 block.xzDistanceTo(entity_position) >= 1.3 &&
                 block.xzDistanceTo(entity_position) <= 4 &&
@@ -195,7 +193,6 @@ export class AutoCrystal {
                 this.bot.entity.position.xzDistanceTo(block) >= 1.3
         );
 
-        
         positions = positions.filter(
             (block) => this.bot.blockAt(block.offset(0, 1, 0))?.name === "air" && this.bot.blockAt(block.offset(0, 2, 0))?.name === "air"
         );
@@ -237,10 +234,9 @@ export class AutoCrystal {
             // use that position so the whole array doesn't have to be sorted
             if (killPosition) return [killPosition.position];
 
-
             let bestPositions = arr.sort(function (a, b) {
                 //care more about enemy damage than self damage
-                return  (b.enemyDamage - a.enemyDamage)// - (b.selfDamage - a.selfDamage)
+                return b.enemyDamage - a.enemyDamage; // - (b.selfDamage - a.selfDamage)
 
                 //b.enemyDamage - b.selfDamage- (a.enemyDamage - a.selfDamage);
             });
@@ -281,18 +277,22 @@ export class AutoCrystal {
             try {
                 this.bot.lookAt(block.position);
                 const entity = await this.placeEntityWithOptions(block, new Vec3(0, 1, 0), { forceLook: "ignore" });
-                this.crystalsPlaced.add((entity as Entity).position)
+                this.crystalsPlaced.add((entity as Entity).position);
             } catch (err) {
-                console.log(err)
+                console.log(err);
                 console.log("crystal?", !!crystal);
-                console.log(!crystal, crystal?.position.distanceTo(position))
+                console.log(!crystal, crystal?.position.distanceTo(position));
 
                 if (this.options.logErrors) this.bot.emit("AutoCrystalError", err);
                 return false;
             }
 
             crystalPlaced = true;
-        } else if (crystal && crystal.position.distanceTo(this.bot.entity.position) <= Math.pow(this.options.breakDistance!, 2) && this.crystalsPlaced.has(crystal.position)) {
+        } else if (
+            crystal &&
+            crystal.position.distanceTo(this.bot.entity.position) <= Math.pow(this.options.breakDistance!, 2) &&
+            this.crystalsPlaced.has(crystal.position)
+        ) {
             await this.breakCrystal(crystal);
         }
 
@@ -324,10 +324,10 @@ export class AutoCrystal {
             }
 
             await sleep(50 * this.options.breakDelay!);
-            this.bot.lookAt(crystal.position)
+            this.bot.lookAt(crystal.position);
             //*@ts-expect-error
             this.bot.attack(crystal);
-            this.crystalsPlaced.delete(crystal.position)
+            this.crystalsPlaced.delete(crystal.position);
             this.numBroke++;
             // this.crystalsPlaced.delete(crystal.position)
             return true;
@@ -388,7 +388,11 @@ export class AutoCrystal {
         return holes;
     }
 
-    private async placeEntityWithOptions(referenceBlock: Block, faceVector: Vec3, options: Partial<genericPlaceOptions>): Promise<Entity | Error> {
+    private async placeEntityWithOptions(
+        referenceBlock: Block,
+        faceVector: Vec3,
+        options: Partial<genericPlaceOptions>
+    ): Promise<Entity | Error> {
         if (!this.bot.heldItem) throw new Error("must be holding an item to place an entity");
 
         const pos = await this.bot._genericPlace(referenceBlock, faceVector, options);
@@ -450,13 +454,18 @@ export class AutoCrystal {
     private async reportPlaced() {
         while (this.run) {
             const num = this.numPlaced;
-            const broke = this.numBroke
+            const broke = this.numBroke;
             const pause = 1000;
             await sleep(pause);
             const placed = this.numPlaced - num;
-            const broken = this.numBroke - broke
-            if (placed !== 0) console.log(`Placed ${placed} crystals in ${pause} ms. Broke ${broken} crystals. ${(placed / pause) * 1000} pCPS. ${(broken/ pause) * 1000} bCPS.`);
-            else console.log(`Placed 0 crystals. target: ${this.target?.username} positions found: ${this.positions?.length}`)
+            const broken = this.numBroke - broke;
+            if (placed !== 0)
+                console.log(
+                    `Placed ${placed} crystals in ${pause} ms. Broke ${broken} crystals. ${(placed / pause) * 1000} pCPS. ${
+                        (broken / pause) * 1000
+                    } bCPS.`
+                );
+            else console.log(`Placed 0 crystals. target: ${this.target?.username} positions found: ${this.positions?.length}`);
         }
     }
 
@@ -468,7 +477,7 @@ export class AutoCrystal {
      * @private
      */
     private async start(): Promise<void> {
-        console.log(this.started, this.enabled)
+        console.log(this.started, this.enabled);
         if (this.started || !this.enabled) return;
 
         this.reportPlaced();
@@ -480,8 +489,6 @@ export class AutoCrystal {
             const crystal = this.bot.inventory.items().find((item) => item.name.includes("crystal"));
 
             if (this.target && crystal) {
-
-
                 // we equip an end crystal to the main hand if we don't have one equipped
                 if (!this.bot.heldItem || this.bot.heldItem?.name !== crystal?.name) {
                     const requiresConfirmation = this.bot.inventory.requiresConfirmation;
@@ -495,7 +502,7 @@ export class AutoCrystal {
                 }
 
                 //Begin loading positions.
-                (this.options.asyncLoadPositions) ? await this.getPositions() : this.getPositions();
+                this.options.asyncLoadPositions ? await this.getPositions() : this.getPositions();
 
                 try {
                     await sleep(50 * this.options.placeDelay!);
@@ -564,7 +571,6 @@ export class AutoCrystal {
      * @memberof AutoCrystal
      */
     enable(): boolean {
-        
         if (this.started) return false;
         this.enabled = true;
         return true;

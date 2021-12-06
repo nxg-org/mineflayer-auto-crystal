@@ -8,14 +8,11 @@ import { AutoCrystalRewrite } from "./rewrite/AutoCrystal";
 import { AutoCrystalRewriteTwo } from "./rewrite/AutoCrystal2";
 import { AABB } from "@nxg-org/mineflayer-util-plugin";
 
-
-
 export function getEntityAABB(entity: { position: Vec3; height: number }) {
     const w = entity.height / 2;
     const { x, y, z } = entity.position;
     return new AABB(-w, 0, -w, w, entity.height, w).offset(x, y, z);
 }
-
 
 export async function oldFindPosition(ctx: AutoCrystalRewrite | AutoCrystal | AutoCrystalRewriteTwo, entity: Entity): Promise<Vec3[]> {
     const bot = ctx.bot;
@@ -60,32 +57,30 @@ export async function oldFindPosition(ctx: AutoCrystalRewrite | AutoCrystal | Au
 //     return isAboveAir && botDistance && hasNoIntersectingEntities;
 // },
 
-export async function testFindPosition(ctx: AutoCrystalRewrite | AutoCrystal | AutoCrystalRewriteTwo, entity: Entity): Promise<Vec3[]>  {
+export async function testFindPosition(ctx: AutoCrystalRewrite | AutoCrystal | AutoCrystalRewriteTwo, entity: Entity): Promise<Vec3[]> {
     const bot = ctx.bot;
     const blockInfoFunc = (block: Block) => {
         if (block.position.distanceTo(bot.entity.position) > ctx.placeDistance) return false;
-    
+
         const hasAirAbove = bot.blockAt(block.position.offset(0, 1, 0))?.name === "air";
         const botNotStandingOnBlock = block.position.xzDistanceTo(bot.entity.position) > 1;
         // const targetNotStandingOnBlock = block.position.xzDistanceTo(entity.position) > 1;
         // do no intersecting entity check
         const { x: aboveX, y: aboveY, z: aboveZ } = block.position.offset(0, 1, 0);
         const blockBoundingBox = new AABB(aboveX, aboveY, aboveZ, aboveX + 0.5, aboveY + 1, aboveZ + 0.5);
-        
+
         // const entityAABBs = [entity].map((entity) => {
         //.filter(e => ["end_crystal", "player"].includes(e.name!)
         const entityAABBs = (Object.values(bot.entities) as Entity[])
             .filter((e) => e.name?.includes("_crystal") || e.name?.includes("player"))
             .map((entity: Entity) => {
                 // taken from taken from https://github.com/PrismarineJS/prismarine-physics/blob/d145e54a4bb8604300258badd7563f59f2101922/index.js#L92
-                const w = (entity.height) / 2;
+                const w = entity.height / 2;
                 const { x, y, z } = entity.position;
                 return new AABB(-w, 0, -w, w, entity.height, w).offset(x, y, z);
             });
         const hasNoIntersectingEntities = entityAABBs.filter((aabb) => aabb.intersects(blockBoundingBox)).length === 0;
-        return hasAirAbove && botNotStandingOnBlock  && hasNoIntersectingEntities; //&& targetNotStandingOnBlock
-
-
+        return hasAirAbove && botNotStandingOnBlock && hasNoIntersectingEntities; //&& targetNotStandingOnBlock
     };
 
     const findBlocksNearPoint = entity.position;
@@ -96,7 +91,7 @@ export async function testFindPosition(ctx: AutoCrystalRewrite | AutoCrystal | A
         //@ts-expect-error
         useExtraInfo: blockInfoFunc,
         maxDistance: 5,
-        count: 20
+        count: 20,
     });
     // if (!blocks) return bot.chat("Couldn't find bedrock or obsidian block that has air above it near myself.");
     // blocks = blocks.sort((a, b) => a.distanceTo(findBlocksNearPoint) - b.distanceTo(findBlocksNearPoint));
@@ -113,7 +108,7 @@ export async function testFindPosition(ctx: AutoCrystalRewrite | AutoCrystal | A
  * @param ctx
  * @param entity
  */
-export async function predictivePositioning(ctx: AutoCrystalRewrite | AutoCrystalRewriteTwo, entity: Entity): Promise<Vec3[]>  {
+export async function predictivePositioning(ctx: AutoCrystalRewrite | AutoCrystalRewriteTwo, entity: Entity): Promise<Vec3[]> {
     const bot = ctx.bot;
     const predictedAABBs: { [base: string]: AABB[] } = {};
 
@@ -124,7 +119,7 @@ export async function predictivePositioning(ctx: AutoCrystalRewrite | AutoCrysta
         const hasAirAbove = bot.blockAt(pos.offset(0, 1, 0))?.name === "air";
         const botNotStandingOnBlock = pos.xzDistanceTo(bot.entity.position) > 1;
         const targetNotStandingOnBlock = pos.xzDistanceTo(entity.position) > 1;
-        const { x: aboveX, y: aboveY, z: aboveZ } = pos.offset(0,  1, 0);
+        const { x: aboveX, y: aboveY, z: aboveZ } = pos.offset(0, 1, 0);
         const blockBoundingBox = new AABB(aboveX - 1, aboveY, aboveZ - 1, aboveX + 1, aboveY + 2, aboveZ + 1);
         // const { x: playerX, y: playerY, z: playerZ } = entity.position;
         // const blockBoundingBox = new AABB(-0.4, 0, -0.4, 0.4, entity.height, 0.4).offset(playerX, playerY, playerZ);
@@ -134,8 +129,6 @@ export async function predictivePositioning(ctx: AutoCrystalRewrite | AutoCrysta
         return hasAirAbove && botNotStandingOnBlock && targetNotStandingOnBlock && hasNoIntersectingEntities;
     };
 
-
-
     function sortBlocksByDamage(positions: Vec3[]) {
         return positions.sort(
             (a, b) =>
@@ -144,15 +137,16 @@ export async function predictivePositioning(ctx: AutoCrystalRewrite | AutoCrysta
         );
     }
 
-
-
     blocks = sortBlocksByDamage(blocks);
 
     let finalFound = blocks.slice(0, 5).map((b) => {
         if (!b) return [];
         const finalBlocks: Vec3[] = [b];
         const index = b.toString();
-        predictedAABBs[index] = predictedAABBs[index] ?? [getEntityAABB({position: bot.entity.position, height: 1}), getEntityAABB({ position: b.offset(0.5, 1, 0.5), height: 2.01 })];
+        predictedAABBs[index] = predictedAABBs[index] ?? [
+            getEntityAABB({ position: bot.entity.position, height: 1 }),
+            getEntityAABB({ position: b.offset(0.5, 1, 0.5), height: 2.01 }),
+        ];
 
         //getEntityAABB(bot.entity)
         for (let i = 1; i < ctx.placementsPerTick && i < blocks.length; i++) {

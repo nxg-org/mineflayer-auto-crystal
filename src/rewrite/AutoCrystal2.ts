@@ -60,7 +60,7 @@ export class AutoCrystalRewriteTwo {
 
     private lastPlaceFinish = performance.now();
 
-    public placedCrystals: {[pos: string]: (typeof AABB)[]} = {}
+    public placedCrystals: { [pos: string]: typeof AABB[] } = {};
 
     constructor(public bot: Bot, options?: Partial<AutoCrystalRewriteOptionsTwo>) {
         this.bot = bot;
@@ -139,22 +139,16 @@ export class AutoCrystalRewriteTwo {
 
     public getAllValidCrystals(mode: "place" | "break" | "both" = "both") {
         switch (mode) {
-            case "both": 
-            return this.getAllCrystals().filter(
-                (e) =>
-                    e.position.distanceTo(this.bot.entity.position) < this.breakDistance ||
-                    e.position.distanceTo(this.bot.entity.position) < this.placeDistance
-            ); 
-            case "break": 
-            return this.getAllCrystals().filter(
-                (e) =>
-                    e.position.distanceTo(this.bot.entity.position) < this.breakDistance
-            ); 
-            case "place": 
-            return this.getAllCrystals().filter(
-                (e) =>
-                    e.position.distanceTo(this.bot.entity.position) < this.placeDistance
-            ); 
+            case "both":
+                return this.getAllCrystals().filter(
+                    (e) =>
+                        e.position.distanceTo(this.bot.entity.position) < this.breakDistance ||
+                        e.position.distanceTo(this.bot.entity.position) < this.placeDistance
+                );
+            case "break":
+                return this.getAllCrystals().filter((e) => e.position.distanceTo(this.bot.entity.position) < this.breakDistance);
+            case "place":
+                return this.getAllCrystals().filter((e) => e.position.distanceTo(this.bot.entity.position) < this.placeDistance);
         }
     }
 
@@ -257,7 +251,7 @@ export class AutoCrystalRewriteTwo {
     public isBlockGood(pos: Vec3, entity: Entity | null) {
         entity ??= this.target;
         let safeCheck = true;
-        
+
         if (entity) {
             const selfDamage = this.selfDamage(pos.offset(0.5, 1, 0.5));
             const enemyDamage = this.getDamage(entity, pos.offset(0.5, 1, 0.5));
@@ -271,7 +265,7 @@ export class AutoCrystalRewriteTwo {
         return false;
     }
 
-    public isCrystalGood(entity: Entity, mode: "place" | "break" |"both" = "both"): boolean {
+    public isCrystalGood(entity: Entity, mode: "place" | "break" | "both" = "both"): boolean {
         return this.getAllValidCrystals(mode).includes(entity);
     }
 
@@ -307,7 +301,7 @@ export class AutoCrystalRewriteTwo {
             this.usingBackup = backup;
             if (bestPositions.length === 0 && !backup) return await this.findPositions(entity, number, false, true);
             else if (bestPositions.length === 0 && backup) return null;
-            return bestPositions.slice(0, number)
+            return bestPositions.slice(0, number);
         }
 
         if (!this.placementPriority || this.placementPriority === "none") {
@@ -354,13 +348,11 @@ export class AutoCrystalRewriteTwo {
     }
 
     private addCrystalAABBFromBlock(position: Vec3) {
-        position = position.offset(0.5, 1, 0.5)
-        const index = position.toString()
-        const aabb = getEntityAABB({position: position, height: 2.01})
-        this.placedCrystals[index] ??= [getEntityAABB({position: this.bot.entity.position, height: 1})]
-        if (!((this.placedCrystals[index]).includes(aabb)))
-        this.placedCrystals[index].push(aabb)
-        
+        position = position.offset(0.5, 1, 0.5);
+        const index = position.toString();
+        const aabb = getEntityAABB({ position: position, height: 2.01 });
+        this.placedCrystals[index] ??= [getEntityAABB({ position: this.bot.entity.position, height: 1 })];
+        if (!this.placedCrystals[index].includes(aabb)) this.placedCrystals[index].push(aabb);
     }
 
     // const latestId = Number(Object.keys(this.bot.entities).sort((a, b) => Number(a) - Number(b))[0]);
@@ -374,7 +366,7 @@ export class AutoCrystalRewriteTwo {
             const block = this.bot.blockAt(position);
             if (!block || !["obsidian", "bedrock"].includes(block.name)) return false;
             else {
-                await this.bot._genericPlace(block, new Vec3(0, 1, 0), { forceLook: true, offhand: this.useOffhand })
+                await this.bot._genericPlace(block, new Vec3(0, 1, 0), { forceLook: true, offhand: this.useOffhand });
                 // this.addCrystalAABBFromBlock(position)
                 this.numPlaced++;
                 // console.log(this.placedCrystals[position.offset(0.5, 1, 0.5).toString()].length)
@@ -384,8 +376,6 @@ export class AutoCrystalRewriteTwo {
             return false;
         }
     }
-
-    
 
     private async breakCrystal(entity?: Entity): Promise<boolean> {
         if (!entity) entity = this.bot.util.filters.nearestCrystalFilter() ?? undefined;
@@ -457,11 +447,10 @@ export class AutoCrystalRewriteTwo {
     private async unlockedStart() {
         // let time = performance.now();
         while (this.$enabled && this.isRunning) {
-      
             if (!this.target || !this.target.isValid) {
                 this.target = this.bot.util.filters.allButOtherBotsFilter();
             }
-            const target = this.target
+            const target = this.target;
 
             if (!target || !this.hasCrystals()) break;
             const equipped = await this.equipCrystal();
@@ -474,8 +463,8 @@ export class AutoCrystalRewriteTwo {
 
             // console.log(positions)
             for (const pos of positions) {
-                this.test(pos)
-                await sleep(50)
+                this.test(pos);
+                await sleep(50);
             }
             // await sleep(50 * this.placeDelay - (performance.now() - time))
             // // console.log(performance.now() - time);
@@ -499,7 +488,6 @@ export class AutoCrystalRewriteTwo {
             //         if (bool) return await this.breakCrystal();
             //     })
             // );
-
 
             // time = performance.now()
             // console.log(performance.now() - time);

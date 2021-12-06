@@ -1,21 +1,17 @@
-import { AutoCrystal } from "./AutoCrystal";
 import { Bot } from "mineflayer";
 import { Block } from "prismarine-block";
 import { Vec3 } from "vec3";
 import customDamageInject from "./customDamageCalc";
-import { Item } from "prismarine-item";
 import { Entity } from "prismarine-entity";
-import { AutoCrystalRewrite } from "./rewrite/AutoCrystal";
 import { AutoCrystalRewriteTwo } from "./rewrite/AutoCrystal2";
-import type {genericPlaceOptions} from "./types"
-
+import type { genericPlaceOptions } from "./types";
 
 declare module "mineflayer" {
     interface Bot {
         autoCrystal: AutoCrystalRewriteTwo;
         _genericPlace: (referenceBlock: Block, faceVector: Vec3, options: Partial<genericPlaceOptions>) => Promise<Vec3>;
-        getExplosionDamages: (targetEntity: Entity, sourcePos: Vec3, power: number, rawDamages?: boolean) => number | null
-        selfExplosionDamages: (sourcePos: Vec3, power: number, rawDamages?: boolean) => number | null
+        getExplosionDamages: (targetEntity: Entity, sourcePos: Vec3, power: number, rawDamages?: boolean) => number | null;
+        selfExplosionDamages: (sourcePos: Vec3, power: number, rawDamages?: boolean) => number | null;
     }
 
     interface BotEvents {
@@ -24,10 +20,9 @@ declare module "mineflayer" {
 }
 declare module "prismarine-entity" {
     interface Entity {
-        attributes: { [index: string]:  {value: number, modifiers: any[] }},
+        attributes: { [index: string]: { value: number; modifiers: any[] } };
     }
 }
-
 
 // {
 //     useBackupPosAlgorithm: true,
@@ -50,12 +45,11 @@ declare module "prismarine-entity" {
 //     breakDelay: 0,
 // }
 export default function inject(bot: Bot) {
-    bot.autoCrystal = new AutoCrystalRewriteTwo(bot, 
-        );
+    bot.autoCrystal = new AutoCrystalRewriteTwo(bot);
 
-    customDamageInject(bot)
+    customDamageInject(bot);
 }
 
-
 export { AutoCrystal } from "./AutoCrystal";
-export { genericPlaceOptions }
+export { AutoCrystalRewrite } from "./rewrite/AutoCrystal";
+export { genericPlaceOptions };

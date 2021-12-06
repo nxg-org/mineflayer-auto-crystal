@@ -2,7 +2,7 @@ import { Effects } from "minecraft-data";
 import { Bot } from "mineflayer";
 import { Entity } from "prismarine-entity";
 import { Item, NormalizedEnchant } from "prismarine-item";
-import md from "minecraft-data"
+import md from "minecraft-data";
 import { Vec3 } from "vec3";
 
 const armorPieces = ["head", "torso", "legs", "feet"];
@@ -64,33 +64,32 @@ function getAttributeValue(prop: any) {
 function getDamageWithEnchantments(damage: number, equipment: Item[]) {
     const enchantments = equipment.some((e) => !!e)
         ? equipment
-              .map((armor) =>
-                  armor?.enchants
-                      .map((enchant: NormalizedEnchant) =>
-                          enchant?.name === "protection" ? enchant.lvl : enchant?.name === "blast_protection" ? enchant.lvl * 2 : 0
-                      ) 
-                      .reduce((b: number, a: number) => b + a, 0) ?? [0]
+              .map(
+                  (armor) =>
+                      armor?.enchants
+                          .map((enchant: NormalizedEnchant) =>
+                              enchant?.name === "protection" ? enchant.lvl : enchant?.name === "blast_protection" ? enchant.lvl * 2 : 0
+                          )
+                          .reduce((b: number, a: number) => b + a, 0) ?? [0]
               )
               .reduce((b: number, a: number) => b + a, 0)
         : 0;
     return damage * (1 - Math.min(enchantments, 20) / 25);
 }
 
-
-
 export default function customDamageInject(bot: Bot) {
-    const effects = md(bot.version).effects
+    const effects = md(bot.version).effects;
     let resistanceIndex = "11";
     for (const effectId in effects) {
-        const effect = effects[effectId] 
+        const effect = effects[effectId];
         if (effect.name.includes("resistance")) {
-            resistanceIndex = effectId
+            resistanceIndex = effectId;
             break;
         }
     }
     const damageMultiplier = 8; // for 1.12+ 8 for 1.8 TODO check when the change occur (likely 1.9)
     const armorThoughnessKey = "generic.armorToughness"; // was renamed in 1.16
-    const armorProtectionKey = "generic.armor"
+    const armorProtectionKey = "generic.armor";
 
     const difficultyValues = {
         peaceful: 0,
@@ -100,9 +99,9 @@ export default function customDamageInject(bot: Bot) {
     };
 
     //There's a mistyping in mineflayer. Effect[] is not accurate. You cannot map over it.
-    function getDamageWithEffects(damage: number, effects: {[id: string]: {id: number, amplifier: number, duration: number}}){
-        const resistanceLevel = effects?.[resistanceIndex]?.amplifier ?? 0
-        return damage * (1 - resistanceLevel / 5)
+    function getDamageWithEffects(damage: number, effects: { [id: string]: { id: number; amplifier: number; duration: number } }) {
+        const resistanceLevel = effects?.[resistanceIndex]?.amplifier ?? 0;
+        return damage * (1 - resistanceLevel / 5);
     }
 
     bot.selfExplosionDamages = (sourcePos: Vec3, power: number, rawDamages = false) => {
@@ -121,7 +120,7 @@ export default function customDamageInject(bot: Bot) {
             damages = getDamageAfterAbsorb(damages, armor, armorToughness);
             const equipment = armorPieces.map((piece) => bot.inventory.slots[bot.getEquipmentDestSlot(piece)]);
             damages = getDamageWithEnchantments(damages, equipment);
-            damages = getDamageWithEffects(damages, bot.entity.effects as any)
+            damages = getDamageWithEffects(damages, bot.entity.effects as any);
             damages *= difficultyValues[bot.game.difficulty] * 0.5;
         } else if (!rawDamages && !bot.entity.attributes[armorProtectionKey]) {
             return null;
@@ -144,7 +143,7 @@ export default function customDamageInject(bot: Bot) {
             const armorToughness = getAttributeValue(targetEntity.attributes[armorThoughnessKey]);
             damages = getDamageAfterAbsorb(damages, armor, armorToughness);
             damages = getDamageWithEnchantments(damages, targetEntity.equipment);
-            damages = getDamageWithEffects(damages, targetEntity.effects as any)
+            damages = getDamageWithEffects(damages, targetEntity.effects as any);
 
             // console.log(targetEntity.username, targetEntity.equipment, damages)
             // const allEnchants = allButCheckingArmor.map(armor => armor.enchants.map(enchantFunc).reduce(add, 0)).reduce(add, 0) + enchantments.map(enchantFunc).reduce(add, 0)
@@ -158,5 +157,4 @@ export default function customDamageInject(bot: Bot) {
         }
         return Math.floor(damages);
     };
-
 }
