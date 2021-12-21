@@ -23,7 +23,11 @@ bot.on("chat", async (username, message) => {
             if (!target) return console.log("no entity")
             bot.autoCrystal.attack(target);
             break;
+        case "getholes":
+            bot.chat(`I found ${bot.autoCrystal.getHoles().length} holes.`)
+            break;
         case "stop":
+        case "cease":
             bot.autoCrystal.stop();
             break;
     }

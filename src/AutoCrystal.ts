@@ -126,7 +126,7 @@ export class AutoCrystal {
         const handName = this.useOffhand ? "off-hand" : "hand";
         const crystal = this.bot.util.inv.getAllItemsExceptCurrent(handName).find((item) => item?.name.includes("_crystal"));
         if (crystal) {
-            await this.bot.equip(crystal, handName);
+            await this.bot.util.inv.customEquip(crystal, handName);
             //await this.bot.util.builtInsPriority({ group: "inventory", priority: 10 }, this.bot.equip, crystal, handName);
             return !!this.bot.util.inv.getHandWithItem(this.useOffhand)?.name.includes("_crystal");
         }
