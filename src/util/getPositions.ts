@@ -3,9 +3,7 @@ import { Entity } from "prismarine-entity";
 import mineflayer, { Bot } from "mineflayer";
 import pathfinder from "mineflayer-pathfinder";
 import { Vec3 } from "vec3";
-import { AutoCrystal } from "./AutoCrystal";
-import { AutoCrystalRewrite } from "./rewrite/AutoCrystal";
-import { AutoCrystalRewriteTwo } from "./rewrite/AutoCrystal2";
+import { AutoCrystal } from "../AutoCrystal";
 import { AABB } from "@nxg-org/mineflayer-util-plugin";
 
 export function getEntityAABB(entity: { position: Vec3; height: number }) {
@@ -14,7 +12,7 @@ export function getEntityAABB(entity: { position: Vec3; height: number }) {
     return new AABB(-w, 0, -w, w, entity.height, w).offset(x, y, z);
 }
 
-export async function oldFindPosition(ctx: AutoCrystalRewrite | AutoCrystal | AutoCrystalRewriteTwo, entity: Entity): Promise<Vec3[]> {
+export async function oldFindPosition(ctx: AutoCrystal, entity: Entity): Promise<Vec3[]> {
     const bot = ctx.bot;
     const entity_position = entity.position;
     return bot.findBlocks({
@@ -57,7 +55,7 @@ export async function oldFindPosition(ctx: AutoCrystalRewrite | AutoCrystal | Au
 //     return isAboveAir && botDistance && hasNoIntersectingEntities;
 // },
 
-export async function testFindPosition(ctx: AutoCrystalRewrite | AutoCrystal | AutoCrystalRewriteTwo, entity: Entity): Promise<Vec3[]> {
+export async function testFindPosition(ctx: AutoCrystal, entity: Entity): Promise<Vec3[]> {
     const bot = ctx.bot;
     const blockInfoFunc = (block: Block) => {
         if (block.position.distanceTo(bot.entity.position) > ctx.placeDistance) return false;
@@ -108,7 +106,7 @@ export async function testFindPosition(ctx: AutoCrystalRewrite | AutoCrystal | A
  * @param ctx
  * @param entity
  */
-export async function predictivePositioning(ctx: AutoCrystalRewrite | AutoCrystalRewriteTwo, entity: Entity): Promise<Vec3[]> {
+export async function predictivePositioning(ctx: AutoCrystal, entity: Entity): Promise<Vec3[]> {
     const bot = ctx.bot;
     const predictedAABBs: { [base: string]: AABB[] } = {};
 

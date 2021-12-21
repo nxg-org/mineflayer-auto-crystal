@@ -3,3 +3,4 @@
 .github/
 src/
 tsconfig.json
+lib/old

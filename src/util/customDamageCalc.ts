@@ -88,8 +88,8 @@ export default function customDamageInject(bot: Bot) {
         }
     }
     const damageMultiplier = 8; // for 1.12+ 8 for 1.8 TODO check when the change occur (likely 1.9)
-    const armorThoughnessKey = "generic.armorToughness"; // was renamed in 1.16
-    const armorProtectionKey = "generic.armor";
+    const armorThoughnessKey = "minecraft:generic.armor_toughness" //"generic.armorToughness"; // was renamed in 1.16
+    const armorProtectionKey = "minecraft:generic.armor";
 
     const difficultyValues = {
         peaceful: 0,
@@ -104,6 +104,7 @@ export default function customDamageInject(bot: Bot) {
         return damage * (1 - resistanceLevel / 5);
     }
 
+    //TODO: This apparently breaks on higher versions than 1.12.2. Weird.
     bot.selfExplosionDamages = (sourcePos: Vec3, power: number, rawDamages = false) => {
         const distance = bot.entity.position.distanceTo(sourcePos);
         const radius = 2 * power;

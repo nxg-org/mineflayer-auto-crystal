@@ -1,14 +1,15 @@
 import { Bot } from "mineflayer";
 import { Block } from "prismarine-block";
 import { Vec3 } from "vec3";
-import customDamageInject from "./customDamageCalc";
+import customDamageInject from "./util/customDamageCalc";
 import { Entity } from "prismarine-entity";
-import { AutoCrystalRewriteTwo } from "./rewrite/AutoCrystal2";
+import { AutoCrystal } from "./AutoCrystal";
 import type { genericPlaceOptions } from "./types";
+import utilPlugin from "@nxg-org/mineflayer-util-plugin"
 
 declare module "mineflayer" {
     interface Bot {
-        autoCrystal: AutoCrystalRewriteTwo;
+        autoCrystal: AutoCrystal;
         _genericPlace: (referenceBlock: Block, faceVector: Vec3, options: Partial<genericPlaceOptions>) => Promise<Vec3>;
         getExplosionDamages: (targetEntity: Entity, sourcePos: Vec3, power: number, rawDamages?: boolean) => number | null;
         selfExplosionDamages: (sourcePos: Vec3, power: number, rawDamages?: boolean) => number | null;
@@ -45,11 +46,11 @@ declare module "prismarine-entity" {
 //     breakDelay: 0,
 // }
 export default function inject(bot: Bot) {
-    bot.autoCrystal = new AutoCrystalRewriteTwo(bot);
+    if (!bot.util) bot.loadPlugin(utilPlugin)
+    bot.autoCrystal = new AutoCrystal(bot);
 
     customDamageInject(bot);
 }
 
-export { AutoCrystal } from "./AutoCrystal";
-export { AutoCrystalRewrite } from "./rewrite/AutoCrystal";
+export {  AutoCrystal } from "./AutoCrystal";
 export { genericPlaceOptions };
